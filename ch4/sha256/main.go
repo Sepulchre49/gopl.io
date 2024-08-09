@@ -6,10 +6,12 @@
 // The sha256 command computes the SHA256 hash (an array) of a string.
 package main
 
-import "fmt"
+import (
+	"crypto/sha256"
+	"fmt"
 
-//!+
-import "crypto/sha256"
+	"gopl.io/ch2/popcount"
+) //!+
 
 func main() {
 	c1 := sha256.Sum256([]byte("x"))
@@ -20,6 +22,26 @@ func main() {
 	// 4b68ab3847feda7d6c62c1fbcbeebfa35eab7351ed5e78f4ddadea5df64b8015
 	// false
 	// [32]uint8
+
+        fmt.Printf("There are %d bits difference between the two hashes.\n", compareHashes(&c1, &c2))
+}
+
+func compareHashes(a *[32]byte, b *[32]byte) int {
+    var diff [32]byte
+    for i := range diff {
+        diff[i] = a[i] & b[i]
+    }
+
+    count := 0
+    for i := 0; i < 4; i++ {
+        var number uint64
+        for j := 0; j < 8; j++ {
+            idx := 8 * i + j
+            number += uint64(diff[idx]) << (8*(7-j))
+        }
+        count += popcount.PopCount(number)
+    }
+    return count
 }
 
 //!-
